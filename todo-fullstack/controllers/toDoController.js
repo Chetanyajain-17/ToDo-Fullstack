@@ -1,7 +1,7 @@
 const ToDo = require("../models/ToDoList");
 
 
-exports.createToDo = async (req,res)=>{
+const createToDo = async (req,res)=>{
     try{
         const data = req.body;
         const todo = new ToDo(data);
@@ -14,7 +14,7 @@ exports.createToDo = async (req,res)=>{
         res.status(err);
     }
 }
-exports.getAllToDo = async (req,res)=>{
+const getAllToDo = async (req,res)=>{
     let {userId} = req.params;
 
     try{
@@ -27,23 +27,29 @@ exports.getAllToDo = async (req,res)=>{
     }
 }
 
-exports.updateToDo = async (req,res)=>{
-    try{
-        const{id} = req.params;
-        const{data} = req.body;
-        const result = await ToDo.findByIdAndUpdate(id,{$set:data},{returnOriginal:false});
-        console.log(result);
-        res.send({messgae:'ToDoList Updated'});
-    }
-    catch(err){
-        console.log(err);
-        res.send(400).send(err);
-    }
-}
 
-exports.deleteToDo = async ( req,res)=>{
+const updateToDo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const updatedTask = await ToDo.findByIdAndUpdate(id, updates, { new: true }); // ✅ returns updated doc
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: "ToDo not found" });
+    }
+
+    res.status(200).json(updatedTask); // ✅ return updated object
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: "Update failed" });
+  }
+};
+
+
+const deleteToDo = async ( req,res)=>{
     try{
-        const {userId} = req.params;
+        const {id} = req.params;
         const result = await ToDo.findByIdAndDelete(id);
         console.log(result);
         res.send({message:"ToDo Task Deleted"});
@@ -53,3 +59,9 @@ exports.deleteToDo = async ( req,res)=>{
         res.status(400).send(err);
     }
 }
+module.exports = {
+  createToDo,
+  getAllToDo,
+  deleteToDo,
+  updateToDo, 
+};
